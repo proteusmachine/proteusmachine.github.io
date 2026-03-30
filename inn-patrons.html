@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inn Patron Generator — The Proteus Compendium</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:            #1c1209;
+      --parchment:      #f5ecd7;
+      --parchment-dark: #e8d9bc;
+      --parchment-mid:  #ede0c4;
+      --amber:          #b8720a;
+      --amber-light:    #d4921c;
+      --red:            #7a1f1f;
+      --red-light:      #9e2a2a;
+      --stone:          #6b5d4f;
+      --stone-light:    #8c7b6b;
+      --gold:           #c9a84c;
+      --green:          #2d5a27;
+      --green-light:    #4a7c43;
+      --shadow:         rgba(28,18,9,0.18);
+    }
+
+    body {
+      font-family: 'Crimson Text', Georgia, serif;
+      background-color: var(--ink);
+      color: var(--parchment);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+    header {
+      position: relative; z-index: 10;
+      text-align: center;
+      padding: 2.5rem 2rem 2rem;
+      border-bottom: 1px solid rgba(201,168,76,0.25);
+      background: linear-gradient(180deg, rgba(28,18,9,0.95) 0%, rgba(40,24,10,0.85) 100%);
+    }
+
+    .site-eyebrow {
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.35em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      opacity: 0.75;
+    }
+
+    .site-title {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(1.6rem, 4vw, 2.6rem);
+      font-weight: 700;
+      color: var(--parchment);
+      letter-spacing: 0.04em;
+      text-shadow: 0 2px 24px rgba(201,168,76,0.18);
+    }
+
+    .site-title span { color: var(--gold); }
+
+    nav {
+      position: relative; z-index: 10;
+      display: flex;
+      justify-content: center;
+      background: rgba(28,18,9,0.7);
+      border-bottom: 1px solid rgba(201,168,76,0.15);
+    }
+
+    nav a {
+      font-family: 'Cinzel', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--stone-light);
+      text-decoration: none;
+      padding: 0.9rem 1.6rem;
+      transition: color 0.2s, background 0.2s;
+      border-right: 1px solid rgba(201,168,76,0.1);
+    }
+
+    nav a:first-child { border-left: 1px solid rgba(201,168,76,0.1); }
+    nav a:hover, nav a.active { color: var(--gold); background: rgba(201,168,76,0.07); }
+
+    main {
+      position: relative; z-index: 5;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 5rem;
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    @media (max-width: 720px) {
+      main { grid-template-columns: 1fr; }
+    }
+
+    /* ── Shared panel style ── */
+    .panel {
+      background: linear-gradient(145deg, rgba(245,236,215,0.06), rgba(245,236,215,0.02));
+      border: 1px solid rgba(201,168,76,0.18);
+      border-radius: 4px;
+      padding: 1.4rem;
+    }
+
+    .panel-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.8;
+      margin-bottom: 1.2rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid rgba(201,168,76,0.15);
+    }
+
+    /* ── Left column controls ── */
+    .controls { display: flex; flex-direction: column; gap: 1.1rem; }
+
+    label {
+      display: block;
+      font-size: 0.78rem;
+      font-family: 'Cinzel', serif;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--stone-light);
+      margin-bottom: 0.35rem;
+    }
+
+    select, input[type="date"], input[type="text"], textarea {
+      width: 100%;
+      background: rgba(28,18,9,0.6);
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 3px;
+      color: var(--parchment);
+      font-family: 'Crimson Text', serif;
+      font-size: 1rem;
+      padding: 0.5rem 0.75rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      border-color: rgba(201,168,76,0.5);
+    }
+
+    select option { background: #2a1a08; }
+
+    textarea { resize: vertical; min-height: 80px; font-size: 0.9rem; line-height: 1.5; }
+
+    .threat-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .threat-row input[type="range"] {
+      flex: 1;
+      padding: 0;
+      border: none;
+      background: none;
+      accent-color: var(--amber);
+    }
+
+    .threat-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.72rem;
+      color: var(--amber-light);
+      min-width: 48px;
+      text-align: right;
+    }
+
+    .btn {
+      font-family: 'Cinzel', serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 0.7rem 1.2rem;
+      border-radius: 3px;
+      border: 1px solid;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .btn-primary {
+      background: rgba(184,114,10,0.15);
+      border-color: var(--amber);
+      color: var(--amber-light);
+    }
+
+    .btn-primary:hover {
+      background: rgba(184,114,10,0.28);
+      color: var(--parchment);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border-color: rgba(201,168,76,0.2);
+      color: var(--stone-light);
+      font-size: 0.68rem;
+    }
+
+    .btn-secondary:hover {
+      border-color: rgba(201,168,76,0.4);
+      color: var(--parchment);
+    }
+
+    .btn-danger {
+      background: transparent;
+      border-color: rgba(122,31,31,0.4);
+      color: #c07070;
+      font-size: 0.68rem;
+    }
+
+    .btn-danger:hover { background: rgba(122,31,31,0.15); }
+
+    /* ── Inn description ── */
+    .inn-desc {
+      font-size: 0.92rem;
+      font-style: italic;
+      color: var(--stone-light);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .inn-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .meta-tag {
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 2px;
+      background: rgba(201,168,76,0.1);
+      border: 1px solid rgba(201,168,76,0.2);
+      color: var(--gold);
+      opacity: 0.8;
+    }
+
+    /* ── Patron list ── */
+    .right-col { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    .snapshot-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .snapshot-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.05rem;
+      color: var(--parchment);
+    }
+
+    .snapshot-meta {
+      font-size: 0.85rem;
+      font-style: italic;
+      color: var(--stone-light);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--stone);
+      font-style: italic;
+      font-size: 1rem;
+    }
+
+    .patron-grid { display: flex; flex-direction: column; gap: 0.75rem; }
+
+    .patron-card {
+      background: rgba(245,236,215,0.04);
+      border: 1px solid rgba(201,168,76,0.12);
+      border-radius: 3px;
+      padding: 1rem 1.1rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.5rem;
+      align-items: start;
+      transition: border-color 0.2s;
+      animation: fadeIn 0.3s ease both;
+    }
+
+    .patron-card:hover { border-color: rgba(201,168,76,0.25); }
+
+    .patron-card.known { border-left: 3px solid var(--amber); }
+    .patron-card.generated { border-left: 3px solid var(--stone); }
+    .patron-card.wanderer { border-left: 3px solid #4a6b8c; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .patron-name {
+      font-family: 'Cinzel', serif;
+      font-size: 0.95rem;
+      color: var(--parchment);
+      margin-bottom: 0.2rem;
+    }
+
+    .patron-role {
+      font-size: 0.88rem;
+      font-style: italic;
+      color: var(--stone-light);
+      margin-bottom: 0.4rem;
+    }
+
+    .patron-detail {
+      font-size: 0.88rem;
+      color: var(--stone-light);
+      line-height: 1.5;
+    }
+
+    .patron-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.5rem; }
+
+    .ptag {
+      font-family: 'Cinzel', serif;
+      font-size: 0.55rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 2px;
+    }
+
+    .ptag-known   { background: rgba(184,114,10,0.15); color: var(--amber-light); border: 1px solid rgba(184,114,10,0.3); }
+    .ptag-gen     { background: rgba(107,93,79,0.2);   color: var(--stone-light);  border: 1px solid rgba(107,93,79,0.3); }
+    .ptag-wander  { background: rgba(74,107,140,0.2);  color: #7aaac7;             border: 1px solid rgba(74,107,140,0.3); }
+    .ptag-secret  { background: rgba(122,31,31,0.15);  color: #c07070;             border: 1px solid rgba(122,31,31,0.3); }
+
+    .patron-likelihood {
+      font-family: 'Cinzel', serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      color: var(--stone);
+      text-align: right;
+    }
+
+    /* ── History ── */
+    .history-entry {
+      background: rgba(245,236,215,0.03);
+      border: 1px solid rgba(201,168,76,0.1);
+      border-radius: 3px;
+      padding: 0.8rem 1rem;
+      font-size: 0.85rem;
+      color: var(--stone-light);
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .history-entry:hover { border-color: rgba(201,168,76,0.25); }
+
+    .history-date {
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem;
+      color: var(--gold);
+      opacity: 0.7;
+      margin-bottom: 0.25rem;
+    }
+
+    /* ── Status overlay ── */
+    .status-msg {
+      text-align: center;
+      padding: 1.5rem;
+      font-style: italic;
+      color: var(--stone-light);
+      font-size: 0.95rem;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(201,168,76,0.2), transparent);
+      margin: 0.5rem 0;
+    }
+
+    .count-badge {
+      display: inline-block;
+      background: rgba(201,168,76,0.12);
+      border: 1px solid rgba(201,168,76,0.2);
+      color: var(--gold);
+      font-family: 'Cinzel', serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      padding: 2px 8px;
+      border-radius: 2px;
+      margin-left: 0.5rem;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(201,168,76,0.2);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<header>
+  <p class="site-eyebrow">The Proteus Compendium</p>
+  <h1 class="site-title">Inn <span>Patron Generator</span></h1>
+</header>
+
+<nav>
+  <a href="index.html">Home</a>
+  <a href="inn-patrons.html" class="active">Inn Patrons</a>
+  <a href="encounters.html">Encounters</a>
+  <a href="campaigns.html">Campaigns</a>
+</nav>
+
+<main>
+
+  <!-- ── LEFT: Controls ── -->
+  <aside class="controls">
+
+    <div class="panel">
+      <div class="panel-title">The Establishment</div>
+
+      <div>
+        <label for="inn-select">Inn</label>
+        <select id="inn-select" onchange="updateInnInfo()">
+          <option value="stonehill">Stonehill Inn — Phandalin</option>
+          <option value="sleeping-giant">Sleeping Giant — Phandalin</option>
+        </select>
+      </div>
+
+      <div id="inn-info" style="margin-top:1rem;">
+        <p class="inn-desc" id="inn-desc"></p>
+        <div class="inn-meta" id="inn-meta"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">When</div>
+
+      <div>
+        <label for="real-date">Real Date</label>
+        <input type="date" id="real-date" />
+      </div>
+
+      <div style="margin-top:0.9rem;">
+        <label for="campaign-day">Campaign Day</label>
+        <input type="text" id="campaign-day" placeholder="e.g. Day 3" />
+      </div>
+
+      <div style="margin-top:0.9rem;">
+        <label for="time-of-day">Time of Day</label>
+        <select id="time-of-day">
+          <option value="morning">Morning (dawn–noon)</option>
+          <option value="afternoon">Afternoon (noon–dusk)</option>
+          <option value="evening" selected>Evening (dusk–midnight)</option>
+          <option value="latenight">Late Night (midnight–dawn)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Tension</div>
+      <label>Redbrand Threat Level</label>
+      <div class="threat-row">
+        <input type="range" min="0" max="4" value="2" id="threat-level" oninput="updateThreatLabel()" />
+        <span class="threat-label" id="threat-label">Medium</span>
+      </div>
+      <p style="font-size:0.8rem; color:var(--stone); font-style:italic; margin-top:0.5rem; line-height:1.5;">
+        Higher threat keeps fearful locals at home and may draw Redbrand informants.
+      </p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">DM Notes</div>
+      <textarea id="dm-notes" placeholder="Any special circumstances for this visit? e.g. 'market day', 'a festival', 'Sildar is meeting someone'…"></textarea>
+    </div>
+
+    <button class="btn btn-primary" onclick="generatePatrons()" id="gen-btn">
+      ✦ Populate the Inn
+    </button>
+
+    <button class="btn btn-secondary" onclick="saveSnapshot()" id="save-btn" style="display:none;">
+      Save This Snapshot
+    </button>
+
+  </aside>
+
+  <!-- ── RIGHT: Output ── -->
+  <div class="right-col">
+
+    <!-- Current snapshot -->
+    <div class="panel" id="output-panel">
+      <div class="panel-title">Who's Here Tonight</div>
+      <div id="output-area">
+        <p class="empty-state">Choose your settings and populate the inn to see who's about.</p>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="panel" id="history-panel" style="display:none;">
+      <div class="panel-title">Chronicle <span class="count-badge" id="history-count">0</span></div>
+      <div id="history-list" style="display:flex; flex-direction:column; gap:0.5rem;"></div>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+// ── Inn data ──────────────────────────────────────────────────────────────────
+const INNS = {
+  stonehill: {
+    name: "Stonehill Inn",
+    town: "Phandalin",
+    campaign: "Phandelver & Below",
+    desc: "A large, newly built roadhouse of fieldstone and rough-hewn timbers, standing opposite the town green. The common room is warm and well-lit, filled with the smell of woodsmoke, ale, and roasting meat.",
+    tags: ["Town Centre", "Fieldstone & Timber", "6 Rooms", "Family-Run"],
+    competingVenues: 1,
+    populationBracket: "village",
+    atmosphere: "cozy, community hub, new construction, family warmth"
+  },
+  "sleeping-giant": {
+    name: "Sleeping Giant",
+    town: "Phandalin",
+    campaign: "Phandelver & Below",
+    desc: "A rundown tap house at the east end of Phandalin, frequented by the Redbrands. The place reeks of sour ale and bad decisions. Locals with sense avoid it entirely.",
+    tags: ["East End", "Tap House", "Redbrand Haunt", "Rough Crowd"],
+    competingVenues: 1,
+    populationBracket: "village",
+    atmosphere: "rough, dangerous, Redbrand controlled, low-life"
+  }
+};
+
+// ── Known NPCs ────────────────────────────────────────────────────────────────
+// likelihood: base % chance at each time slot [morning, afternoon, evening, latenight]
+// threatModifier: how threat level (0-4) affects their likelihood. negative = less likely when threat high
+const KNOWN_NPCS = [
+  {
+    name: "Toblen Stonehill",
+    role: "Innkeeper",
+    race: "Human",
+    type: "known",
+    inns: ["stonehill"],
+    likelihood: [60, 85, 95, 40],
+    threatModifier: -5,
+    personality: "Friendly, entrepreneurial, quietly worried",
+    secret: "Knows more about the Redbrands than he lets on but fears for his family",
+    rumor: "Thel Dendrar was murdered by the Redbrands; his family has gone missing.",
+    notes: "Proprietor. Almost always present during open hours."
+  },
+  {
+    name: "Elsa",
+    role: "Bartender",
+    race: "Dwarf",
+    type: "known",
+    inns: ["stonehill"],
+    likelihood: [40, 70, 95, 60],
+    threatModifier: 0,
+    personality: "Chatty, proud of her sister, good listener",
+    secret: "Her sister Gwyn is a Harper agent in Neverwinter",
+    rumor: "Daran Edermath, the orchard keeper, is a former adventurer.",
+    notes: "Works the bar most evenings. Likes to talk about her sister."
+  },
+  {
+    name: "Pip Stonehill",
+    role: "Innkeeper's son",
+    race: "Human (child)",
+    type: "known",
+    inns: ["stonehill"],
+    likelihood: [70, 80, 40, 0],
+    threatModifier: -8,
+    personality: "Curious, excitable, loves gossip",
+    secret: null,
+    rumor: "Carp Alderleaf found a secret tunnel in the woods and nearly got caught by Redbrands.",
+    notes: "Toblen's son. Rarely up past dinner."
+  },
+  {
+    name: "Sildar Hallwinter",
+    role: "Resident guest (Room 6)",
+    race: "Human",
+    type: "known",
+    inns: ["stonehill"],
+    likelihood: [30, 50, 80, 20],
+    threatModifier: 5,
+    personality: "Dignified, purposeful, quietly alert",
+    secret: "Lords' Alliance agent searching for Iarno Albrek",
+    rumor: null,
+    notes: "Currently occupying room 6. Uses the common room for meetings."
+  },
+  {
+    name: "Freda",
+    role: "Weaver",
+    race: "Gnome",
+    type: "known",
+    inns: ["stonehill"],
+    likelihood: [10, 20, 65, 15],
+    threatModifier: -10,
+    personality: "Sharp-tongued, observant, brave enough to speak plainly",
+    secret: null,
+    rumor: "The Redbrands leave the Miner's Exchange alone — they don't want trouble with Halia Thornton.",
+    notes: "Evening regular. Sits near the fire."
+  },
+  {
+    name: "Lanar",
+    role: "Miner",
+    race: "Human",
+    type: "known",
+    inns: ["stonehill"],
+    likelihood: [5, 15, 75, 30],
+    threatModifier: -5,
+    personality: "Boisterous, worried about his livelihood, prone to exaggeration",
+    secret: null,
+    rumor: "Marauders attacking trade caravans on Triboar Trail. Goblins may be involved.",
+    notes: "Comes in most evenings after his shift."
+  },
+  {
+    name: "Narth",
+    role: "Farmer",
+    race: "Human",
+    type: "known",
+    inns: ["stonehill"],
+    likelihood: [5, 20, 60, 10],
+    threatModifier: -8,
+    personality: "Cautious, observant, churchgoing",
+    secret: null,
+    rumor: "Sister Garaele left town for a few days and returned wounded.",
+    notes: "Comes in a few times a week."
+  },
+  {
+    name: "Halia Thornton",
+    role: "Runs the Miner's Exchange",
+    race: "Human",
+    type: "known",
+    inns: ["stonehill", "sleeping-giant"],
+    likelihood: [5, 15, 35, 5],
+    threatModifier: 10,
+    personality: "Calculated, ambitious, always watching",
+    secret: "Zhentarim agent. Wants the Black Spider's operation for herself.",
+    rumor: null,
+    notes: "Appears occasionally. Never stays long. Always has a reason."
+  },
+  {
+    name: "Sister Garaele",
+    role: "Oversees the Shrine of Luck",
+    race: "Elf",
+    type: "known",
+    inns: ["stonehill"],
+    likelihood: [5, 20, 30, 5],
+    threatModifier: -5,
+    personality: "Devoted, quietly fierce, currently nursing wounds",
+    secret: "Harper agent. Recently returned from a dangerous errand.",
+    rumor: null,
+    notes: "Currently wounded. Lower likelihood until recovered."
+  },
+  {
+    name: "Harbin Wester",
+    role: "Townmaster",
+    race: "Human",
+    type: "known",
+    inns: ["stonehill"],
+    likelihood: [5, 10, 40, 5],
+    threatModifier: -15,
+    personality: "Pompous, cowardly, desperate to seem in control",
+    secret: "Has been doing nothing about the Redbrands because he's terrified of them",
+    rumor: null,
+    notes: "Shows up occasionally to maintain appearances. Avoids conflict."
+  },
+  {
+    name: "Daran Edermath",
+    role: "Orchard keeper",
+    race: "Half-elf",
+    type: "known",
+    inns: ["stonehill"],
+    likelihood: [5, 10, 45, 10],
+    threatModifier: 5,
+    personality: "Calm, measured, watchful — moves like someone who's seen real danger",
+    secret: "Member of the Order of the Gauntlet. Former adventurer.",
+    rumor: null,
+    notes: "Comes in a few evenings a week. Sits with his back to the wall."
+  },
+  {
+    name: "Qelline Alderleaf",
+    role: "Halfling farmer",
+    race: "Halfling",
+    type: "known",
+    inns: ["stonehill"],
+    likelihood: [5, 25, 35, 5],
+    threatModifier: -8,
+    personality: "Warm, practical, fiercely protective of her son Carp",
+    secret: null,
+    rumor: null,
+    notes: "Comes in occasionally, usually early evening."
+  },
+  {
+    name: "Linene Graywind",
+    role: "Runs the Lionshield Coster",
+    race: "Human",
+    type: "known",
+    inns: ["stonehill"],
+    likelihood: [5, 15, 30, 5],
+    threatModifier: -5,
+    personality: "No-nonsense, businesslike, quietly grateful",
+    secret: null,
+    rumor: null,
+    notes: "Occasional visitor, usually to discuss trade news."
+  }
+];
+
+const TIME_LABELS = {
+  morning: "Morning", afternoon: "Afternoon", evening: "Evening", latenight: "Late Night"
+};
+
+const TIME_IDX = { morning: 0, afternoon: 1, evening: 2, latenight: 3 };
+
+const THREAT_LABELS = ["None", "Low", "Medium", "High", "Extreme"];
+
+let currentSnapshot = null;
+let history = JSON.parse(localStorage.getItem('patronHistory') || '[]');
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('real-date').value = new Date().toISOString().split('T')[0];
+  updateInnInfo();
+  updateThreatLabel();
+  renderHistory();
+});
+
+function updateInnInfo() {
+  const inn = INNS[document.getElementById('inn-select').value];
+  document.getElementById('inn-desc').textContent = inn.desc;
+  const meta = document.getElementById('inn-meta');
+  meta.innerHTML = inn.tags.map(t => `<span class="meta-tag">${t}</span>`).join('');
+}
+
+function updateThreatLabel() {
+  const v = parseInt(document.getElementById('threat-level').value);
+  document.getElementById('threat-label').textContent = THREAT_LABELS[v];
+}
+
+// ── Core generation ───────────────────────────────────────────────────────────
+async function generatePatrons() {
+  const innKey   = document.getElementById('inn-select').value;
+  const inn      = INNS[innKey];
+  const timeKey  = document.getElementById('time-of-day').value;
+  const timeIdx  = TIME_IDX[timeKey];
+  const threat   = parseInt(document.getElementById('threat-level').value);
+  const realDate = document.getElementById('real-date').value;
+  const campDay  = document.getElementById('campaign-day').value;
+  const dmNotes  = document.getElementById('dm-notes').value.trim();
+
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Reading the common room…';
+
+  const output = document.getElementById('output-area');
+  output.innerHTML = '<p class="status-msg"><span class="spinner"></span> The door creaks open…</p>';
+
+  // Roll known NPCs
+  const present = [];
+  const absent  = [];
+
+  for (const npc of KNOWN_NPCS) {
+    if (!npc.inns.includes(innKey)) continue;
+    let base = npc.likelihood[timeIdx];
+    base += npc.threatModifier * (threat - 2); // threat 2 = medium = baseline
+    base = Math.max(0, Math.min(100, base));
+    if (Math.random() * 100 < base) {
+      present.push({ ...npc, rollPct: base });
+    } else {
+      absent.push({ ...npc, rollPct: base });
+    }
+  }
+
+  // Ask AI to generate 2-4 filler locals + maybe a wanderer
+  let aiPatrons = [];
+  try {
+    aiPatrons = await generateAIPatrons(inn, timeKey, threat, dmNotes, present.map(p => p.name));
+  } catch(e) {
+    console.warn('AI generation failed, skipping fillers', e);
+  }
+
+  currentSnapshot = {
+    inn: inn.name,
+    town: inn.town,
+    realDate,
+    campDay,
+    timeOfDay: timeKey,
+    threat,
+    dmNotes,
+    present: [...present, ...aiPatrons],
+    absent
+  };
+
+  renderSnapshot(currentSnapshot);
+  document.getElementById('save-btn').style.display = 'block';
+  btn.disabled = false;
+  btn.innerHTML = '✦ Populate the Inn';
+}
+
+async function generateAIPatrons(inn, timeKey, threat, dmNotes, alreadyPresent) {
+  const threatDesc = THREAT_LABELS[threat];
+  const prompt = `You are generating background NPCs for a D&D 5e tavern scene.
+
+Inn: ${inn.name}, ${inn.town} (${inn.campaign})
+Atmosphere: ${inn.atmosphere}
+Time of day: ${TIME_LABELS[timeKey]}
+Redbrand threat level: ${threatDesc}
+Already present: ${alreadyPresent.join(', ')}
+DM notes: ${dmNotes || 'None'}
+
+Generate ${timeKey === 'latenight' ? 2 : 3} local filler patrons and 1 traveller/wanderer who would realistically be in this inn right now.
+For each NPC return a JSON array with objects containing:
+- name (string)
+- role (string, their occupation/reason for being here)  
+- race (string)
+- type (either "generated" for locals or "wanderer" for travellers)
+- personality (string, 1-2 sentences)
+- secret (string or null, something a perceptive party might notice or uncover)
+- detail (string, one evocative sentence describing what they're doing right now in the inn)
+
+Respond ONLY with a valid JSON array. No markdown, no explanation.`;
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1000,
+      messages: [{ role: "user", content: prompt }]
+    })
+  });
+
+  const data = await response.json();
+  const text = data.content.map(b => b.text || '').join('');
+  const clean = text.replace(/```json|```/g, '').trim();
+  return JSON.parse(clean);
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderSnapshot(snap) {
+  const output = document.getElementById('output-area');
+
+  const dateStr = [snap.campDay, snap.realDate].filter(Boolean).join(' · ');
+  const header = `
+    <div class="snapshot-header">
+      <span class="snapshot-title">${snap.inn} <span style="opacity:0.5;font-size:0.8em;">·</span> ${TIME_LABELS[snap.timeOfDay]}</span>
+      <span class="snapshot-meta">${dateStr}</span>
+    </div>`;
+
+  const knownPresent   = snap.present.filter(p => p.type === 'known');
+  const genPresent     = snap.present.filter(p => p.type === 'generated');
+  const wanderers      = snap.present.filter(p => p.type === 'wanderer');
+
+  let html = header;
+
+  if (snap.present.length === 0) {
+    html += `<p class="empty-state">The inn is unusually quiet tonight.</p>`;
+  } else {
+    html += `<div class="patron-grid">`;
+
+    if (knownPresent.length) {
+      html += knownPresent.map(p => patronCard(p)).join('');
+    }
+
+    if (genPresent.length || wanderers.length) {
+      html += `<div class="divider"></div>`;
+      html += [...genPresent, ...wanderers].map(p => patronCard(p)).join('');
+    }
+
+    html += `</div>`;
+    html += `<p style="font-size:0.8rem;font-style:italic;color:var(--stone);margin-top:1rem;text-align:right;">${snap.present.length} souls in the common room tonight.</p>`;
+  }
+
+  output.innerHTML = html;
+}
+
+function patronCard(p) {
+  const typeTag = p.type === 'known'
+    ? `<span class="ptag ptag-known">Local · Known</span>`
+    : p.type === 'wanderer'
+      ? `<span class="ptag ptag-wander">Wanderer</span>`
+      : `<span class="ptag ptag-gen">Local</span>`;
+
+  const secretTag = p.secret
+    ? `<span class="ptag ptag-secret">Has a secret</span>`
+    : '';
+
+  const detail = p.detail || p.rumor
+    ? `<p class="patron-detail" style="margin-top:0.4rem;">${p.detail || (p.rumor ? `"${p.rumor}"` : '')}</p>`
+    : '';
+
+  const pct = p.rollPct !== undefined
+    ? `<div class="patron-likelihood">${Math.round(p.rollPct)}% likely</div>` : '';
+
+  return `
+    <div class="patron-card ${p.type}">
+      <div>
+        <div class="patron-name">${p.name}</div>
+        <div class="patron-role">${p.race} · ${p.role}</div>
+        <p class="patron-detail">${p.personality}</p>
+        ${detail}
+        <div class="patron-tags">${typeTag}${secretTag}</div>
+      </div>
+      ${pct}
+    </div>`;
+}
+
+// ── History ───────────────────────────────────────────────────────────────────
+function saveSnapshot() {
+  if (!currentSnapshot) return;
+  const entry = { ...currentSnapshot, savedAt: new Date().toISOString() };
+  history.unshift(entry);
+  localStorage.setItem('patronHistory', JSON.stringify(history.slice(0, 50)));
+  renderHistory();
+  document.getElementById('save-btn').textContent = 'Saved ✓';
+  setTimeout(() => { document.getElementById('save-btn').textContent = 'Save This Snapshot'; }, 2000);
+}
+
+function renderHistory() {
+  if (history.length === 0) return;
+  const panel = document.getElementById('history-panel');
+  const list  = document.getElementById('history-list');
+  const count = document.getElementById('history-count');
+  panel.style.display = 'block';
+  count.textContent = history.length;
+
+  list.innerHTML = history.slice(0, 10).map((h, i) => `
+    <div class="history-entry" onclick="loadSnapshot(${i})">
+      <div class="history-date">${h.campDay || ''} ${h.realDate ? '· ' + h.realDate : ''} · ${TIME_LABELS[h.timeOfDay]}</div>
+      <div>${h.inn} — ${h.present.length} patrons present</div>
+      ${h.dmNotes ? `<div style="font-style:italic;opacity:0.6;margin-top:2px;">${h.dmNotes.slice(0,60)}…</div>` : ''}
+    </div>`).join('');
+}
+
+function loadSnapshot(idx) {
+  currentSnapshot = history[idx];
+  renderSnapshot(currentSnapshot);
+  document.getElementById('save-btn').style.display = 'block';
+  document.getElementById('output-panel').scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
