@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Proteus Compendium</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:       #1c1209;
+      --parchment: #f5ecd7;
+      --parchment-dark: #e8d9bc;
+      --parchment-mid:  #ede0c4;
+      --amber:     #b8720a;
+      --amber-light: #d4921c;
+      --red:       #7a1f1f;
+      --red-light: #9e2a2a;
+      --stone:     #6b5d4f;
+      --stone-light: #8c7b6b;
+      --gold:      #c9a84c;
+      --shadow:    rgba(28,18,9,0.18);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Crimson Text', Georgia, serif;
+      background-color: var(--ink);
+      color: var(--parchment);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Texture overlay ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+    /* ── Header ── */
+    header {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 4rem 2rem 3rem;
+      border-bottom: 1px solid rgba(201,168,76,0.25);
+      background: linear-gradient(180deg, rgba(28,18,9,0.95) 0%, rgba(40,24,10,0.85) 100%);
+    }
+
+    .site-eyebrow {
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.35em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      opacity: 0.85;
+    }
+
+    .site-title {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(2.4rem, 6vw, 4.2rem);
+      font-weight: 700;
+      color: var(--parchment);
+      line-height: 1.1;
+      letter-spacing: 0.04em;
+      text-shadow: 0 2px 24px rgba(201,168,76,0.18);
+      margin-bottom: 1rem;
+    }
+
+    .site-title span {
+      color: var(--gold);
+    }
+
+    .site-subtitle {
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--stone-light);
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ── Ornament ── */
+    .ornament {
+      display: block;
+      text-align: center;
+      color: var(--gold);
+      font-size: 1.1rem;
+      letter-spacing: 0.5em;
+      margin: 1.5rem auto 0;
+      opacity: 0.5;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      background: rgba(28,18,9,0.7);
+      border-bottom: 1px solid rgba(201,168,76,0.15);
+    }
+
+    nav a {
+      font-family: 'Cinzel', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--stone-light);
+      text-decoration: none;
+      padding: 0.9rem 1.6rem;
+      transition: color 0.2s, background 0.2s;
+      border-right: 1px solid rgba(201,168,76,0.1);
+    }
+
+    nav a:first-child { border-left: 1px solid rgba(201,168,76,0.1); }
+    nav a:hover { color: var(--gold); background: rgba(201,168,76,0.07); }
+
+    /* ── Main ── */
+    main {
+      position: relative;
+      z-index: 5;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    /* ── Section heading ── */
+    .section-heading {
+      font-family: 'Cinzel', serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.7;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .section-heading::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(201,168,76,0.3), transparent);
+    }
+
+    /* ── Tool cards grid ── */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 3rem;
+    }
+
+    .tool-card {
+      background: linear-gradient(145deg, rgba(245,236,215,0.07), rgba(245,236,215,0.03));
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 4px;
+      padding: 1.6rem 1.5rem;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: border-color 0.25s, background 0.25s, transform 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tool-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px;
+      height: 100%;
+      background: var(--amber);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+
+    .tool-card:hover {
+      border-color: rgba(201,168,76,0.45);
+      background: linear-gradient(145deg, rgba(245,236,215,0.1), rgba(245,236,215,0.05));
+      transform: translateY(-2px);
+    }
+
+    .tool-card:hover::before { opacity: 1; }
+
+    .tool-card.coming-soon {
+      opacity: 0.45;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .card-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+
+    .card-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--parchment);
+      margin-bottom: 0.4rem;
+      letter-spacing: 0.04em;
+    }
+
+    .card-desc {
+      font-size: 0.95rem;
+      color: var(--stone-light);
+      line-height: 1.55;
+      font-style: italic;
+    }
+
+    .card-badge {
+      display: inline-block;
+      margin-top: 0.9rem;
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 2px;
+    }
+
+    .badge-live {
+      background: rgba(184,114,10,0.2);
+      color: var(--amber-light);
+      border: 1px solid rgba(184,114,10,0.35);
+    }
+
+    .badge-soon {
+      background: rgba(107,93,79,0.2);
+      color: var(--stone-light);
+      border: 1px solid rgba(107,93,79,0.3);
+    }
+
+    /* ── Campaign section ── */
+    .campaigns-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .campaign-card {
+      background: rgba(245,236,215,0.04);
+      border: 1px solid rgba(201,168,76,0.12);
+      border-radius: 4px;
+      padding: 1.2rem 1.25rem;
+    }
+
+    .campaign-name {
+      font-family: 'Cinzel', serif;
+      font-size: 0.88rem;
+      color: var(--parchment);
+      margin-bottom: 0.25rem;
+    }
+
+    .campaign-setting {
+      font-size: 0.85rem;
+      font-style: italic;
+      color: var(--stone-light);
+      margin-bottom: 0.6rem;
+    }
+
+    .campaign-towns {
+      font-size: 0.82rem;
+      color: var(--stone-light);
+      opacity: 0.7;
+    }
+
+    /* ── Footer ── */
+    footer {
+      position: relative;
+      z-index: 5;
+      text-align: center;
+      padding: 2rem;
+      border-top: 1px solid rgba(201,168,76,0.1);
+      font-size: 0.82rem;
+      font-style: italic;
+      color: var(--stone);
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    header  { animation: fadeUp 0.6s ease both; }
+    nav     { animation: fadeUp 0.6s 0.1s ease both; }
+    main    { animation: fadeUp 0.6s 0.2s ease both; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <p class="site-eyebrow">A Dungeon Master's Workshop</p>
+    <h1 class="site-title">The Proteus <span>Compendium</span></h1>
+    <p class="site-subtitle">Living tools for living worlds — encounter tables, patron generators, and chronicles of campaigns past.</p>
+    <span class="ornament">— ✦ —</span>
+  </header>
+
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="inn-patrons.html">Inn Patrons</a>
+    <a href="encounters.html">Encounters</a>
+    <a href="campaigns.html">Campaigns</a>
+  </nav>
+
+  <main>
+
+    <p class="section-heading">Tools of the Trade</p>
+
+    <div class="tools-grid">
+
+      <a href="inn-patrons.html" class="tool-card">
+        <span class="card-icon">🍺</span>
+        <div class="card-title">Inn Patron Generator</div>
+        <p class="card-desc">Populate any tavern with locals, wanderers, and secrets. Track who was where and when across your campaigns.</p>
+        <span class="card-badge badge-live">Live</span>
+      </a>
+
+      <a href="encounters.html" class="tool-card">
+        <span class="card-icon">🎲</span>
+        <div class="card-title">Random Encounter Tables</div>
+        <p class="card-desc">Campaign-specific encounter tables tuned to your party's level and current location in the story.</p>
+        <span class="card-badge badge-live">Live</span>
+      </a>
+
+      <div class="tool-card coming-soon">
+        <span class="card-icon">👤</span>
+        <div class="card-title">NPC Generator</div>
+        <p class="card-desc">Instant named NPCs with personalities, secrets, and hooks — flavored to your campaign setting.</p>
+        <span class="card-badge badge-soon">Coming Soon</span>
+      </div>
+
+      <div class="tool-card coming-soon">
+        <span class="card-icon">💰</span>
+        <div class="card-title">Treasure Generator</div>
+        <p class="card-desc">Loot tables, hoard breakdowns, and flavored item descriptions appropriate to the encounter.</p>
+        <span class="card-badge badge-soon">Coming Soon</span>
+      </div>
+
+    </div>
+
+    <p class="section-heading">Active Campaigns</p>
+
+    <div class="campaigns-grid">
+      <div class="campaign-card">
+        <div class="campaign-name">Phandelver & Below</div>
+        <div class="campaign-setting">Forgotten Realms — Sword Coast</div>
+        <div class="campaign-towns">Phandalin · Conyberry · Thundertree</div>
+      </div>
+      <div class="campaign-card">
+        <div class="campaign-name">Homebrew Campaign</div>
+        <div class="campaign-setting">Forgotten Realms — Custom</div>
+        <div class="campaign-towns">Add your towns here</div>
+      </div>
+      <div class="campaign-card">
+        <div class="campaign-name">Curse of Strahd</div>
+        <div class="campaign-setting">Ravenloft — Barovia</div>
+        <div class="campaign-towns">Vallaki · Barovia Village · Krezk</div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    The Proteus Compendium &mdash; built for the table, one session at a time.
+  </footer>
+
+</body>
+</html>
